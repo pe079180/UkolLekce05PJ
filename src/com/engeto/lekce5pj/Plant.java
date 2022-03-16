@@ -1,19 +1,20 @@
 package com.engeto.lekce5pj;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Plant {
     private String name;
     private String notes;
     private LocalDate plantedDate;
-    private LocalDate wateringDate;
+    private LocalDate lastWateringDate;
     private Integer frequencyOfWatering;
 
-    public Plant(String name, String notes, LocalDate plantedDate, LocalDate wateringDate, Integer frequencyOfWatering)  {
+    public Plant(String name, String notes, LocalDate plantedDate, LocalDate lastWateringDate, Integer frequencyOfWatering) {
         this.name = name;
         this.notes = notes;
         this.plantedDate = plantedDate;
-        this.wateringDate = wateringDate;
+        this.lastWateringDate = lastWateringDate;
 //        if (frequencyOfWatering <= 0) {
 //            throw new PlantException("Unexpected  frequencyOfWatering " + frequencyOfWatering);
 //        }
@@ -22,7 +23,7 @@ public class Plant {
 
     public Plant(String name, LocalDate plantedDate, Integer frequencyOfWatering) {
 //        try {
-            this(name, null, plantedDate, LocalDate.now(), frequencyOfWatering);
+        this(name, "", plantedDate, LocalDate.now(), frequencyOfWatering);
 //        } catch (PlantException e) {
 //        }
     }
@@ -55,12 +56,12 @@ public class Plant {
         this.plantedDate = plantedDate;
     }
 
-    public LocalDate getWateringDate() {
-        return wateringDate;
+    public LocalDate getLastWateringDate() {
+        return lastWateringDate;
     }
 
-    public void setWateringDate(LocalDate wateringDate) {
-        this.wateringDate = wateringDate;
+    public void setLastWateringDate(LocalDate lastWateringDate) {
+        this.lastWateringDate = lastWateringDate;
     }
 
     public Integer getFrequencyOfWatering() {
@@ -72,7 +73,30 @@ public class Plant {
     }
 
     public String getWateringInfo() {
-        return name + ", watered " + wateringDate + ", recomended watering " + wateringDate.plusDays(frequencyOfWatering);
+        return name + ", watered " + lastWateringDate + ", recomended watering " + lastWateringDate.plusDays(frequencyOfWatering);
+    }
+
+    public static Plant Parse(String plantStr, String delimiter) throws PlantException {
+        String[] attributes = plantStr.split(delimiter);
+
+        if (attributes.length != 5) throw new PlantException("unexpected number of attributes");
+
+        String name = attributes[0];
+        String notes = attributes[1];
+
+        try {
+            Integer frequencyOfWatering = Integer.parseInt(attributes[2]);
+            LocalDate lastWateringDate = LocalDate.parse(attributes[3]);
+            LocalDate plantedDate = LocalDate.parse(attributes[4]);
+
+            return new Plant(name, notes, plantedDate, lastWateringDate, frequencyOfWatering);
+
+        } catch (DateTimeParseException e) {
+            throw new PlantException("incorrect date in row " + plantStr);
+        } catch (NumberFormatException e) {
+            throw new PlantException("incorrect number in row " + plantStr);
+        }
+
     }
 
     @Override
@@ -81,7 +105,7 @@ public class Plant {
                 "name='" + name + '\'' +
                 ", notes='" + notes + '\'' +
                 ", plantedDate=" + plantedDate +
-                ", wateringDate=" + wateringDate +
+                ", lastWateringDate=" + lastWateringDate +
                 ", frequencyOfWatering=" + frequencyOfWatering +
                 '}';
     }
