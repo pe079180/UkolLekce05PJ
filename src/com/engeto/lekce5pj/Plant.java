@@ -15,17 +15,11 @@ public class Plant {
         this.notes = notes;
         this.plantedDate = plantedDate;
         this.lastWateringDate = lastWateringDate;
-//        if (frequencyOfWatering <= 0) {
-//            throw new PlantException("Unexpected  frequencyOfWatering " + frequencyOfWatering);
-//        }
         this.frequencyOfWatering = frequencyOfWatering;
     }
 
     public Plant(String name, LocalDate plantedDate, Integer frequencyOfWatering) {
-//        try {
         this(name, "", plantedDate, LocalDate.now(), frequencyOfWatering);
-//        } catch (PlantException e) {
-//        }
     }
 
     public Plant(String name) {
@@ -60,7 +54,12 @@ public class Plant {
         return lastWateringDate;
     }
 
-    public void setLastWateringDate(LocalDate lastWateringDate) {
+    public void setLastWateringDate(LocalDate lastWateringDate) throws PlantException {
+        LocalDate plantedDate = getPlantedDate();
+        if (lastWateringDate.isBefore(plantedDate)) {
+            throw new PlantException("Last watering date " + lastWateringDate + " has to be >= planted date " + plantedDate);
+        }
+
         this.lastWateringDate = lastWateringDate;
     }
 
@@ -68,7 +67,10 @@ public class Plant {
         return frequencyOfWatering;
     }
 
-    public void setFrequencyOfWatering(Integer frequencyOfWatering) {
+    public void setFrequencyOfWatering(Integer frequencyOfWatering) throws PlantException {
+        if (frequencyOfWatering <= 0) {
+            throw new PlantException("Unexpected frequencyOfWatering " + frequencyOfWatering);
+        }
         this.frequencyOfWatering = frequencyOfWatering;
     }
 
@@ -76,7 +78,7 @@ public class Plant {
         return name + ", watered " + lastWateringDate + ", recomended watering " + lastWateringDate.plusDays(frequencyOfWatering);
     }
 
-    public static Plant Parse(String plantStr, String delimiter) throws PlantException {
+    public static Plant parse(String plantStr, String delimiter) throws PlantException {
         String[] attributes = plantStr.split(delimiter);
 
         if (attributes.length != 5) throw new PlantException("unexpected number of attributes");
@@ -97,6 +99,10 @@ public class Plant {
             throw new PlantException("incorrect number in row " + plantStr);
         }
 
+    }
+
+    public String formatToOutput(String delimiter) {
+        return getName() + delimiter + getNotes() + delimiter + getFrequencyOfWatering() + delimiter + getLastWateringDate() + delimiter + getPlantedDate();
     }
 
     @Override
